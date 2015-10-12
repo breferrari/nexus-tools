@@ -13,23 +13,16 @@
 
 #!/bin/bash
 
-ADB="/usr/bin/adb"
-FASTBOOT="/usr/bin/fastboot"
+ADB="/usr/local/bin/adb"
+FASTBOOT="/usr/local/bin/fastboot"
 UDEV="/etc/udev/rules.d/51-android.rules"
 OS=$(uname)
 
 # get sudo
 
-echo "[INFO] Nexus Tools 2.7.1"
+echo "[INFO] Nexus Tools 2.8"
 echo "[INFO] Please enter sudo password for uninstall."
 sudo echo "[ OK ] Sudo access granted." || { echo "[ERROR] No sudo access."; exit 1; }
-
-# check for mac os x
-
-if [ "$OS" == "Darwin" ]; then
-   echo "[WARN] Nexus Tools has been reported to have problems on Mac OS X 10.11 (El Capitan)."
-   echo "[WARN] More info and the fix: http://bit.ly/nexustoolscapitan"
-fi
 
 # remove files
 
@@ -37,13 +30,23 @@ if [ -f $ADB ]; then
    sudo rm $ADB
    echo "[ OK ] ADB removed."
 else
-   echo "[INFO] ADB not found in /usr/bin, skipping uninstall."
+   if [ -f /usr/bin/adb ]; then
+      sudo rm /usr/bin/adb
+      echo "[ OK ] ADB removed from /usr/bin/adb."
+   else
+      echo "[INFO] ADB not found in /usr/local/bin or /usr/bin, skipping uninstall."
+   fi
 fi
 if [ -f $FASTBOOT ]; then
    sudo rm $FASTBOOT
    echo "[ OK ] Fastboot removed."
 else
-   echo "[INFO] Fastboot not found in /usr/bin, skipping uninstall."
+   if [ -f /usr/bin/fastboot ]; then
+      sudo rm /usr/bin/fastboot
+      echo "[ OK ] ADB removed from /usr/bin/fastboot."
+   else
+      echo "[INFO] Fastboot not found in /usr/local/bin or /usr/bin, skipping uninstall."
+   fi
 fi
 if [ -f $UDEV ]; then
    sudo rm $UDEV

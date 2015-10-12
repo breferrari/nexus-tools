@@ -13,15 +13,15 @@
 
 #!/bin/bash
 
-ADB="/usr/bin/adb"
-FASTBOOT="/usr/bin/fastboot"
+ADB="/usr/local/bin/adb"
+FASTBOOT="/usr/local/bin/fastboot"
 UDEV="/etc/udev/rules.d/51-android.rules"
 OS=$(uname)
 ARCH=$(uname -m)
 
 XCODE=0
 
-BASEURL="http://github.com/corbindavenport/nexus-tools/raw/master"
+BASEURL="https://github.com/corbindavenport/nexus-tools/raw/master"
 
 _install() {
 	sudo curl -Lfks -o "$1" "$2" && echo "[INFO] Success." || { echo "[EROR] Download failed."; XCODE=1; }
@@ -62,7 +62,7 @@ _install_udev() {
 
 # get sudo
 
-echo "[INFO] Nexus Tools 2.7.1"
+echo "[INFO] Nexus Tools 2.8"
 echo "[INFO] Please enter sudo password for install."
 sudo echo "[ OK ] Sudo access granted." || { echo "[ERROR] No sudo access!!"; exit 1; }
 
@@ -79,11 +79,14 @@ if [ -f $FASTBOOT ]; then
     [ "$input" = "" ] && sudo rm $FASTBOOT || exit 1
 fi
 
+# check if bin folder is already created
+if [ ! -d /usr/local/bin/ ]; then
+    sudo mkdir -p /usr/local/bin/
+fi
+
 # detect operating system and install
 
 if [ "$OS" == "Darwin" ]; then # Mac OS X
-    echo "[WARN] Nexus Tools has been reported to have problems on Mac OS X 10.11 (El Capitan)."
-    echo "[WARN] More info and the fix: http://bit.ly/nexustoolscapitan"
     echo "[INFO] Downloading ADB for Mac OS X..."
     _install "$ADB" "$BASEURL/bin/mac-adb" 
     echo "[INFO] Downloading Fastboot for Mac OS X..."
@@ -95,6 +98,9 @@ if [ "$OS" == "Darwin" ]; then # Mac OS X
     echo "[INFO] Making ADB and Fastboot executable..."
     output=$(sudo chmod +x $ADB 2>&1) && echo "[INFO] ADB now executable." || { echo "[EROR] $output"; XCODE=1; }
     output=$(sudo chmod +x $FASTBOOT 2>&1) && echo "[INFO] Fastboot now executable." || { echo "[EROR] $output"; XCODE=1; }
+    
+    echo "[INFO] Adding /usr/local/bin to PATH..."
+    export PATH=$PATH:/usr/local/bin/
 
     [ $XCODE -eq 0 ] && { echo "[ OK ] Done!"; echo "[INFO] Type adb or fastboot to run."; } || { echo "[EROR] Install failed"; }
     echo " "
@@ -131,6 +137,9 @@ elif [ "$OS" == "Linux" ]; then # Generic Linux
     echo "[INFO] Making ADB and Fastboot executable..."
     output=$(sudo chmod +x $ADB 2>&1) && echo "[INFO] ADB OK." || { echo "[EROR] $output"; XCODE=1; }
     output=$(sudo chmod +x $FASTBOOT 2>&1) && echo "[INFO] Fastboot OK." || { echo "[EROR] $output"; XCODE=1; }
+    
+    echo "[INFO] Adding /usr/local/bin to $PATH..."
+    export PATH=$PATH:/usr/local/bin/
 
     if [ $XCODE -eq 0 ]; then
 	echo "[ OK ] Done, type adb or fastboot to run!"
